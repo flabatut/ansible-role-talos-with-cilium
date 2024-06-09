@@ -48,3 +48,7 @@ task molecule -- list
 - https://www.talos.dev/v1.8/talos-guides/install/local-platforms/docker/
 - https://ansible.readthedocs.io/projects/molecule/getting-started/
 - https://cilium.io/
+
+## Todo
+
+- install in .dist binaries deps (ie: talosctl, kubectl,...) and automate using ansible
