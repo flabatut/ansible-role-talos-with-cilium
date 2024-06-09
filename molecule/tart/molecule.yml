@@ -7,9 +7,9 @@ platforms:
     checksum_url: https://github.com/siderolabs/talos/releases/download/v1.7.4/sha256sum.txt
 provisioner:
   name: ansible
-  config_options:
-    tags:
-      run: talos_upgrade_cilium
+  # config_options:
+  #   tags:
+  #     run: talos_upgrade_cilium
   ansible_args:
     - --diff
     # - -vvv

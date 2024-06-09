@@ -34,7 +34,7 @@
       ansible.builtin.command: qemu-img resize {{ tart_vm_dir }}/disk.img +10G
       changed_when: false
 
-    - name: Start VM
-      ansible.builtin.shell: tart run {{ talos_cluster_name }} &
+    - name: Start VM in background
+      ansible.builtin.shell: tart run {{ talos_cluster_name }} --no-graphics &
       changed_when: false
       failed_when: false

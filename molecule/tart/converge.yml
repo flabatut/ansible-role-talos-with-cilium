@@ -1,9 +1,9 @@
 ---
 - name: Converge
-  hosts: all
+  hosts: localhost
   gather_facts: false
   tasks:
-    - name: Replace this task with one that validates your content
-      ansible.builtin.debug:
-        var: hostvars[inventory_hostname]
-        # msg: "This is the effective test"
+    - name: Test Loadbalancer IP connectivity
+      ansible.builtin.import_role:
+        name: talos
+        tasks_from: test_lb_connectivity.yml

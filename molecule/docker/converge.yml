@@ -6,3 +6,8 @@
     - name: Fetch a list of Nodes
       ansible.builtin.debug:
         msg: "{{ query('kubernetes.core.k8s', api_version='v1', kind='Node') }}"
+
+    - name: Test Loadbalancer IP connectivity
+      ansible.builtin.import_role:
+        name: talos
+        tasks_from: test_lb_connectivity.yml

@@ -1,0 +1,53 @@
+---
+- name: Create a pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        labels:
+          run: nginx
+        name: nginx
+        namespace: default
+      spec:
+        containers:
+          - image: nginx
+            name: nginx
+
+- name: Expose pod with LB svc
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          run: nginx
+        name: nginx
+        namespace: default
+      spec:
+        ports:
+          - port: 80
+            protocol: TCP
+            targetPort: 80
+        selector:
+          run: nginx
+        type: LoadBalancer
+
+- name: Wait for LB IP availability
+  ansible.builtin.command: >
+    kubectl wait --for=jsonpath='{.status.loadBalancer.ingress[0].ip}' svc/nginx
+  changed_when: false
+
+- name: Fetch with label selector
+  ansible.builtin.set_fact:
+    lb_ip: "{{ query('kubernetes.core.k8s', kind='Service', label_selector='run=nginx')[0].status.loadBalancer.ingress[0].ip }}"
+
+- name: Wait for Talos management port listening
+  ansible.builtin.wait_for:
+    host: "{{ lb_ip }}"
+    port: 80
+    timeout: 30 # sec
+    state: started
+  changed_when: false
