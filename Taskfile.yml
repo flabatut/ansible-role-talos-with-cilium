@@ -1,0 +1,12 @@
+---
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+  molecule:
+    desc: run molecule command
+    cmds:
+      - poetry run -- molecule {{.CLI_ARGS}}

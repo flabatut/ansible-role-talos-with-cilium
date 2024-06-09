@@ -8,13 +8,31 @@ This ansible role bootstraps one single node running Sidero Talos OS with cilium
 
 - a machine running talos in maintenance mode
 
-## Testing
+## Getting Started
+
+1. Setup local env:
+```
+git clone git@github.com:flabatut/ansible-role-talos-with-cilium.git
+poetry install
+```
+
+2. Get up and running a Talos cluster running as a docker container:
 
 ```
-poetry shell
-molecule test
+task molecule -- create -s docker
 ```
-> molecule list to get available backends supported (ie: docker, tart,...)
+
+3. Alternatively, using Tart.run as backend infra:
+
+```
+task molecule -- create -s tart
+```
+
+4. List available backends (AKA molecule scenarios):
+
+```
+task molecule -- list
+```
 
 ## Rational
 
