@@ -51,3 +51,10 @@
     timeout: 30 # sec
     state: started
   changed_when: false
+
+- name: Check that default nginx page is returned
+  ansible.builtin.uri:
+    url: http://{{ lb_ip }}
+    return_content: true
+  register: result
+  failed_when: "'Welcome to nginx!' not in result.content"

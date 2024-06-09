@@ -1,0 +1,15 @@
+---
+- name: Configure Cilium
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: cilium.lbippool.yaml.j2
+      - path: cilium.l2announcement.yaml.j2
+    apply: true
+
+- name: Upgrade Cilium values for running machines
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ talos_helm_template_render.stdout | from_yaml_all }}"
+  when: "'talos_upgrade_cilium' in ansible_run_tags"
+  changed_when: false

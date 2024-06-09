@@ -1,23 +1,20 @@
-# Ansible Role to deploy Talos in Tart
+# Ansible Role to deploy Talos with Cilium
 
 *This is for educational purpose*
 
-This ansible role bootstraps:
-- a containerized Kubernetes cluster
-- with one single node running Sidero Talos OS
-- with cilium as default CNI.
+This ansible role bootstraps one single node running Sidero Talos OS with cilium as default CNI. Cilium is configured by default with LoadbalancerIP pool and L2 announcement support.
 
 ## Requirements
 
-- [tart](https://tart.run/)
-- [poetry](https://python-poetry.org/docs/basic-usage/)
+- a machine running talos in maintenance mode
 
-## Getting Started
+## Testing
 
-- Start devcontainer
-- Create the cluster: `molecule create`
-- After a few minutes, your `kubeconfig` should be ready to query your freshly created cluster.
-- Destroy the cluster: `molecule destroy`
+```
+poetry shell
+molecule test
+```
+> molecule list to get available backends supported (ie: docker, tart,...)
 
 ## Rational
 

@@ -11,8 +11,9 @@
       changed_when: false
       tags:
         - talos_upgrade_cilium
+        - always
 
-    - name: Generate LB ip pool
+    - name: Generate network facts
       ansible.builtin.set_fact:
         talos_node_ip: "{{ result.stdout }}"
         talos_lb_ip_pool: "{{ subnet | ansible.utils.ipsubnet(30, -1) }}"
@@ -21,6 +22,7 @@
       when: result.rc == 0 and result.stdout is defined
       tags:
         - talos_upgrade_cilium
+        - always
 
     - name: Bootstrap talos
       ansible.builtin.import_role:
