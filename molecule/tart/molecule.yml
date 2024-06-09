@@ -1,0 +1,21 @@
+---
+driver:
+  name: default
+platforms:
+  - name: talos
+    image_url: https://github.com/siderolabs/talos/releases/download/v1.7.4/nocloud-arm64.raw.xz
+    checksum_url: https://github.com/siderolabs/talos/releases/download/v1.7.4/sha256sum.txt
+provisioner:
+  name: ansible
+  config_options:
+    tags:
+      run: talos_upgrade_cilium
+  ansible_args:
+    - --diff
+    # - -vvv
+    # - -t test
+  log: true
+  options:
+    v: true
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles

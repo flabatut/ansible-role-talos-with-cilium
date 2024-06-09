@@ -1,0 +1,11 @@
+---
+- name: Cleanup
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Bootstrap talos
+      ansible.builtin.import_role:
+        name: talos
+        tasks_from: uninstall.yml
+      vars:
+        talos_config_dir: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/talosconfig.d"

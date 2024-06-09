@@ -1,0 +1,29 @@
+---
+- name: Prepare
+  hosts: localhost
+  gather_facts: false
+  vars:
+    talos_cluster_name: "{{ hostvars[inventory_hostname].molecule_yml.platforms[0].name }}"
+  tasks:
+    - name: Get VM IPv4
+      ansible.builtin.command: tart ip --wait 60 {{ talos_cluster_name }}
+      register: result
+      changed_when: false
+      tags:
+        - talos_upgrade_cilium
+
+    - name: Generate LB ip pool
+      ansible.builtin.set_fact:
+        talos_node_ip: "{{ result.stdout }}"
+        talos_lb_ip_pool: "{{ subnet | ansible.utils.ipsubnet(30, -1) }}"
+      vars:
+        subnet: "{{ result.stdout }}/24"
+      when: result.rc == 0 and result.stdout is defined
+      tags:
+        - talos_upgrade_cilium
+
+    - name: Bootstrap talos
+      ansible.builtin.import_role:
+        name: talos
+      vars:
+        talos_config_dir: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/talosconfig.d"

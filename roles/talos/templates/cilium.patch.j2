@@ -1,0 +1,5 @@
+cluster:
+  inlineManifests:
+    - name: cilium
+      contents: |
+        {{ talos_helm_template_render.stdout | indent(8, False) }}

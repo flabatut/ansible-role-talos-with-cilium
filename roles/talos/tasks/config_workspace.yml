@@ -1,0 +1,16 @@
+---
+- name: Load kubeconfig
+  ansible.builtin.command: >
+    talosctl kubeconfig
+      --nodes {{ talos_node_ip }}
+      --endpoints {{ talos_node_ip }}
+      --talosconfig {{ talos_config_dir }}/talosconfig
+      --force
+  changed_when: false
+
+- name: Load talosconfig
+  ansible.builtin.shell: >
+    talosctl config merge {{ talos_config_dir }}/talosconfig &&
+    talosctl config endpoint {{ talos_node_ip }} &&
+    talosctl config node {{ talos_node_ip }}
+  changed_when: false

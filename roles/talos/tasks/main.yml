@@ -1,0 +1,11 @@
+---
+- name: Install Talos cluster
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - install_talos
+
+- name: Uninstall talos
+  ansible.builtin.import_tasks: uninstall.yml
+  tags:
+    - uninstall_talos
+    - never

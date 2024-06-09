@@ -1,0 +1,8 @@
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default-policy
+spec:
+  interfaces: "{{ talos_cilium_l2accouncement_interfaces }}"
+  loadBalancerIPs: true

@@ -1,0 +1,24 @@
+---
+repos:
+  # pre-commit defaults
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+        args: [--unsafe]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.6.0 # put latest release tag from https://github.com/ansible/ansible-lint/releases/
+    hooks:
+      - id: ansible-lint
+        name: Lint Ansible
+        # verbose: true
+
+  # gitleaks
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.3
+    hooks:
+      - id: gitleaks
+        name: Look for leaks in git

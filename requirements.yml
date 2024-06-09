@@ -1,0 +1,6 @@
+---
+# collections only used for molecule testing scenarios
+collections:
+  - community.docker
+  - kubernetes.core
+  - ansible.utils

@@ -1,0 +1,50 @@
+---
+# talos_cluster_name:
+# talos_node_ip:
+# talos_lb_ip_pool:
+talos_cilium_chart_version: "1.15.5"
+talos_kube_api_port: 6443
+talos_config_dir: "talosconfig.d"
+talos_mgmt_port: 50000
+talos_cilium_l2accouncement_interfaces:
+  - eth0
+talos_patches: >
+  .machine.features.hostDNS.enabled = true |
+  .machine.features.hostDNS.forwardKubeDNSToHost = true |
+  .machine.features.kubePrism.enabled = false |
+  .machine.features.kubernetesTalosAPIAccess.enabled = false |
+  .machine.features.stableHostname.enabled = true |
+  .machine.features.diskQuotaSupport.enabled = true |
+  .machine.network.kubespan.enabled = false |
+  .cluster.allowSchedulingOnControlPlanes = true |
+  .cluster.proxy.disabled = true |
+  .cluster.network.cni.name = "none" |
+  .cluster.discovery.enabled = false |
+  .cluster.externalCloudProvider.enabled = false
+# https://docs.cilium.io/en/stable/network/l2-announcements/#sizing-client-rate-limit
+# QPS = #services * (1 / leaseRenewDeadline)
+# services = 20
+# leaseRenewDeadline = 86400s
+# QPS = 20 * (1 / 86400s) = 0,... QPS
+# leaseDuration=604800s # 1w
+# leaseRenewDeadline=86400s # 1d
+# leaseRetryPeriod=3600s # 1h
+talos_cilium_chart_values: |
+  --version {{ talos_cilium_chart_version }}
+  --namespace kube-system
+  --set operator.replicas=1
+  --set ipam.mode=kubernetes
+  --set kubeProxyReplacement=true
+  --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+  --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+  --set cgroup.autoMount.enabled=false
+  --set cgroup.hostRoot=/sys/fs/cgroup
+  --set k8sServiceHost={{ talos_node_ip }}
+  --set k8sServicePort={{ talos_kube_api_port }}
+  --set gatewayAPI.enabled=true
+  --set l2announcements.enabled=true
+  --set k8sClientRateLimit.qps=5
+  --set k8sClientRateLimit.burst=10
+  --set l2announcements.leaseDuration=604800s
+  --set l2announcements.leaseRenewDeadline=86400s
+  --set l2announcements.leaseRetryPeriod=3600s

@@ -1,0 +1,8 @@
+---
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "default-pool"
+spec:
+  blocks:
+    - cidr: "{{ talos_lb_ip_pool }}"

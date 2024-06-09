@@ -1,0 +1,39 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: talos
+    hostname: talos
+    image: ghcr.io/siderolabs/talos:v1.7.4
+    keep_volumes: false
+    pre_build_image: true
+    privileged: true
+    security_opts:
+      - "seccomp=unconfined"
+    mounts:
+      - { type: "tmpfs", target: "/run" }
+      - { type: "tmpfs", target: "/system" }
+      - { type: "tmpfs", target: "/tmp" }
+      - { type: "volume", target: "/system/state" }
+      - { type: "volume", target: "/var" }
+      - { type: "volume", target: "/etc/cni" }
+      - { type: "volume", target: "/etc/kubernetes" }
+      - { type: "volume", target: "/usr/libexec/kubernetes" }
+      - { type: "volume", target: "/opt" }
+    env:
+      PLATFORM: container
+provisioner:
+  name: ansible
+  ansible_args:
+    - --diff
+    # - -vvv
+    # - -t test
+  log: true
+  options:
+    v: true
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles

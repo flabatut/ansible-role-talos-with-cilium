@@ -1,0 +1,15 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    talos_cluster_name: "{{ hostvars[inventory_hostname].molecule_yml.platforms[0].name }}"
+  tasks:
+    - name: Stop Tart VM
+      ansible.builtin.command: tart stop {{ talos_cluster_name }}
+      register: result
+      changed_when: result.rc == 0
+      failed_when: 'result.rc != 0 and result.stderr != pattern'
+      vars:
+        pattern: "VM \"{{ talos_cluster_name }}\" is not running"

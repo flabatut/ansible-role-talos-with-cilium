@@ -1,0 +1,105 @@
+---
+# tasks file for talos
+- name: Stat talos config
+  ansible.builtin.stat:
+    path: "{{ talos_config_dir }}/controlplane.yaml"
+  register: result
+
+- name: Generate talos config
+  ansible.builtin.command: >
+    talosctl gen config
+      {{ talos_cluster_name }}
+      https://{{ talos_node_ip }}:{{ talos_kube_api_port }}
+      --output-types controlplane,talosconfig
+      --output-dir {{ talos_config_dir }}
+  when: result.stat is defined and not result.stat.exists
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc != 0
+
+- name: Patch machine config with cilium values
+  ansible.builtin.command: >
+    talosctl machineconfig patch
+    {{ talos_config_dir }}/controlplane.yaml
+    --patch @{{ talos_config_dir }}/cilium.yaml
+    -o {{ talos_config_dir }}/controlplane.patched.yaml
+  changed_when: false
+  tags:
+    - talos_upgrade_cilium
+
+- name: Patch machine config with talos values
+  ansible.builtin.command: >
+    yq --inplace '{{ talos_patches }}'
+    {{ talos_config_dir }}/controlplane.patched.yaml
+  changed_when: false
+
+- name: Wait for Talos management port listening
+  ansible.builtin.wait_for:
+    host: "{{ talos_node_ip }}"
+    port: "{{ talos_mgmt_port }}"
+    # wait 1 min
+    timeout: 60
+    state: started
+  changed_when: false
+
+- name: Check talos status
+  ansible.builtin.command: >
+    talosctl apply-config
+      --insecure
+      --nodes {{ talos_node_ip }}
+      --file {{ talos_config_dir }}/controlplane.patched.yaml
+      --dry-run
+  changed_when: false
+  failed_when: false
+  register: result
+
+- name: Debug Check talos status
+  ansible.builtin.debug:
+    msg: "{{ result }}"
+
+- name: Apply talos config
+  ansible.builtin.command: >
+    talosctl apply-config
+      --insecure
+      --nodes {{ talos_node_ip }}
+      --file {{ talos_config_dir }}/controlplane.patched.yaml
+  when: "'Node is running in maintenance mode and does not have a config yet.' in result.stderr_lines"
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc != 0
+
+# TODO: handle when previous dependent task skipped (ie: command retry)
+- name: Bootstrap talos
+  ansible.builtin.command: >
+    talosctl bootstrap
+      --nodes {{ talos_node_ip }}
+      --endpoints {{ talos_node_ip }}
+      --talosconfig {{ talos_config_dir }}/talosconfig
+  when: result.rc is defined and result.rc == 0 and result.changed
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc != 0
+
+- name: Wait for kube API port listening
+  ansible.builtin.wait_for:
+    host: "{{ talos_node_ip }}"
+    port: "{{ talos_kube_api_port }}"
+    # wait 1 min
+    timeout: 60
+    state: started
+  changed_when: false
+
+- name: Wait for talos cluster availability
+  # keep wait-timeout agressive to prevent dead context exceed and get accurate refresh
+  ansible.builtin.command: >
+    talosctl health
+      --nodes {{ talos_node_ip }}
+      --endpoints {{ talos_node_ip }}
+      --talosconfig {{ talos_config_dir }}/talosconfig
+      --wait-timeout 1s
+  changed_when: false
+  register: result
+  until: "result.rc == 0"
+  # wait 5 min
+  delay: 5
+  retries: 60

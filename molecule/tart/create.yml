@@ -1,0 +1,40 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    talos_cluster_name: "{{ hostvars[inventory_hostname].molecule_yml.platforms[0].name }}"
+    tart_vm_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/.tart/vms/{{ talos_cluster_name }}"
+  tasks:
+    - name: Stat Tart VM
+      ansible.builtin.command: tart get {{ talos_cluster_name }}
+      changed_when: false
+      register: result
+
+    - name: Create Tart VM
+      ansible.builtin.command: tart create --linux {{ talos_cluster_name }}
+      register: result
+      changed_when: result.rc == 0
+      when: 'result.rc != 0 and result.stderr == pattern'
+      vars:
+        pattern: "the specified VM \"{{ talos_cluster_name }}\" does not exist"
+
+    - name: Download talos image
+      ansible.builtin.get_url:
+        url: "{{ hostvars[inventory_hostname].molecule_yml.platforms[0].image_url }}"
+        dest: "{{ tart_vm_dir }}/disk.img.xz"
+        mode: "0644"
+
+    - name: Extract talos image
+      ansible.builtin.command: xz -k -f -d {{ tart_vm_dir }}/disk.img.xz
+      changed_when: false
+
+    - name: Resize disk
+      ansible.builtin.command: qemu-img resize {{ tart_vm_dir }}/disk.img +10G
+      changed_when: false
+
+    - name: Start VM
+      ansible.builtin.shell: tart run {{ talos_cluster_name }} &
+      changed_when: false
+      failed_when: false

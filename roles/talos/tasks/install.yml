@@ -1,0 +1,36 @@
+---
+- name: Create talos config temporary directory
+  ansible.builtin.file:
+    path: "{{ talos_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Generate cilium manifest for talos inline patch
+  ansible.builtin.import_tasks: generate_cilium_manifests.yml
+  tags:
+    - talos_upgrade_cilium
+
+- name: Configure talos
+  ansible.builtin.import_tasks: config_talos.yml
+
+- name: Configure workspace (kubectl|talosctl)
+  ansible.builtin.import_tasks: config_workspace.yml
+
+- name: Configure Cilium
+  kubernetes.core.k8s:
+    state: present
+    template:
+      - path: cilium.lbippool.yaml.j2
+      - path: cilium.l2announcement.yaml.j2
+    apply: true
+  tags:
+    - talos_upgrade_cilium
+
+- name: Upgrade Cilium values for running machines
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ talos_helm_template_render.stdout | from_yaml_all }}"
+  when: "'talos_upgrade_cilium' in ansible_run_tags"
+  changed_when: false
+  tags:
+    - talos_upgrade_cilium

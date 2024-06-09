@@ -1,0 +1,5 @@
+---
+- name: Delete talos config dir
+  ansible.builtin.file:
+    path: "{{ talos_config_dir }}"
+    state: absent

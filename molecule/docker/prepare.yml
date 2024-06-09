@@ -1,0 +1,26 @@
+---
+- name: Prepare
+  hosts: localhost
+  gather_facts: false
+  vars:
+    talos_cluster_name: "{{ hostvars[inventory_hostname].molecule_yml.platforms[0].name }}"
+  tasks:
+    - name: Get info on talos container
+      community.docker.docker_container_info:
+        name: "{{ talos_cluster_name }}"
+      register: result
+
+    - name: Generate LB ip pool
+      ansible.builtin.set_fact:
+        talos_node_ip: "{{ result.container.NetworkSettings.IPAddress }}"
+        talos_lb_ip_pool: "{{ subnet | ansible.utils.ipsubnet(30, -1) }}"
+      vars:
+        prefix: "{{ result.container.NetworkSettings.IPPrefixLen }}"
+        subnet: "{{ result.container.NetworkSettings.IPAddress }}/{{ prefix }}"
+
+    - name: Bootstrap talos
+      ansible.builtin.import_role:
+        name: talos
+      vars:
+        talos_node_ip: "{{ result.container.NetworkSettings.IPAddress }}"
+        talos_config_dir: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/talosconfig.d"
