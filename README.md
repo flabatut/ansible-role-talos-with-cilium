@@ -14,6 +14,7 @@ This ansible role bootstraps one single node running Sidero Talos OS with cilium
 ```
 git clone git@github.com:flabatut/ansible-role-talos-with-cilium.git
 poetry install
+ansible-galaxy install -r requirements.yml
 ```
 
 2. Get up and running a Talos cluster running as a docker container:
