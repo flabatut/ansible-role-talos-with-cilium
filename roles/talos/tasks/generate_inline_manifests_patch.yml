@@ -19,7 +19,7 @@
 # TODO:
 # - factorize vars
 # - loop tasks
-# - extract version 
+# - extract version
 # https://gateway-api.sigs.k8s.io/guides/?h=crds#installing-gateway-api
 - name: Download GatewayAPI CRDs manifests (standard)
   ansible.builtin.uri:

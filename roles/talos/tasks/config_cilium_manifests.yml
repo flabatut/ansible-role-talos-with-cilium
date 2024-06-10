@@ -8,6 +8,7 @@
       - path: gatewayclass.yaml.j2
     apply: true
 
+# TODO: find a way to sync loop list with template file inline-manifest-patch.yaml.j2
 - name: Upgrade inline manifests patches on running machines
   kubernetes.core.k8s:
     state: present
