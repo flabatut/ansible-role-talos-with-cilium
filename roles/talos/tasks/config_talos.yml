@@ -21,11 +21,11 @@
   ansible.builtin.command: >
     talosctl machineconfig patch
     {{ talos_config_dir }}/controlplane.yaml
-    --patch @{{ talos_config_dir }}/cilium.yaml
+    --patch @{{ talos_config_dir }}/inline-manifest-patch.yaml
     -o {{ talos_config_dir }}/controlplane.patched.yaml
   changed_when: false
   tags:
-    - talos_upgrade_cilium
+    - talos_upgrade_inline_manifests
 
 - name: Patch machine config with talos values
   ansible.builtin.command: >

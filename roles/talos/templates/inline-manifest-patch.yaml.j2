@@ -1,0 +1,11 @@
+cluster:
+  inlineManifests:
+    - name: gateway-api-crds-standard
+      contents: |
+        {{ talos_gateway_api_crds_standard.content | indent(8, False) }}
+    - name: gateway-api-crds-experimental
+      contents: |
+        {{ talos_gateway_api_crds_experimental.content | indent(8, False) }}
+    - name: cilium
+      contents: |
+        {{ talos_helm_template_render.stdout | indent(8, False) }}

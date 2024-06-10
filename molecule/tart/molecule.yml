@@ -13,11 +13,11 @@ provisioner:
   name: ansible
   # config_options:
   #   tags:
-  #     run: talos_upgrade_cilium
+  #     run: talos_upgrade_inline_manifests
   ansible_args:
     - --diff
     # - -vvv
-    # - -t test
+    # - -t talos_upgrade_inline_manifests
   log: true
   options:
     v: true

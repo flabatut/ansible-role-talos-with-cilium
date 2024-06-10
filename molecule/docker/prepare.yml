@@ -10,7 +10,7 @@
         name: "{{ talos_cluster_name }}"
       register: result
       tags:
-        - talos_upgrade_cilium
+        - talos_upgrade_inline_manifests
 
     - name: Generate LB ip pool
       ansible.builtin.set_fact:
@@ -20,7 +20,7 @@
         prefix: "{{ result.container.NetworkSettings.IPPrefixLen }}"
         subnet: "{{ result.container.NetworkSettings.IPAddress }}/{{ prefix }}"
       tags:
-        - talos_upgrade_cilium
+        - talos_upgrade_inline_manifests
 
     - name: Bootstrap talos
       ansible.builtin.import_role:

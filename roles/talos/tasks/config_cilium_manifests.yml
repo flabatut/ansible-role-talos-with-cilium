@@ -5,11 +5,16 @@
     template:
       - path: cilium.lbippool.yaml.j2
       - path: cilium.l2announcement.yaml.j2
+      - path: gatewayclass.yaml.j2
     apply: true
 
-- name: Upgrade Cilium values for running machines
+- name: Upgrade inline manifests patches on running machines
   kubernetes.core.k8s:
     state: present
-    definition: "{{ talos_helm_template_render.stdout | from_yaml_all }}"
-  when: "'talos_upgrade_cilium' in ansible_run_tags"
+    definition: "{{ item }}"
+  when: "'talos_upgrade_inline_manifests' in ansible_run_tags"
   changed_when: false
+  loop:
+    - "{{ talos_gateway_api_crds_standard.content | from_yaml_all }}"
+    - "{{ talos_gateway_api_crds_experimental.content | from_yaml_all }}"
+    - "{{ talos_helm_template_render.stdout | from_yaml_all }}"

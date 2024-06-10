@@ -10,7 +10,7 @@
       register: result
       changed_when: false
       tags:
-        - talos_upgrade_cilium
+        - talos_upgrade_inline_manifests
         - always
 
     - name: Generate network facts
@@ -21,7 +21,7 @@
         subnet: "{{ result.stdout }}/24"
       when: result.rc == 0 and result.stdout is defined
       tags:
-        - talos_upgrade_cilium
+        - talos_upgrade_inline_manifests
         - always
 
     - name: Bootstrap talos

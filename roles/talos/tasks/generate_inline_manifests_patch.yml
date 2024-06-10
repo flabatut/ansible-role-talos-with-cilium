@@ -1,0 +1,42 @@
+---
+# https://www.talos.dev/v1.7/kubernetes-guides/network/deploying-cilium/#method-2-helm-manifests-install
+- name: Add a repository
+  kubernetes.core.helm_repository:
+    name: cilium
+    repo_url: https://helm.cilium.io/
+    # force_update: true
+
+- name: Render Cilium helm chart manifests
+  ansible.builtin.command: >
+    helm template
+      cilium
+      cilium/cilium
+      {{ talos_cilium_chart_values }}
+  register: talos_helm_template_render
+  changed_when: false # because of randomly generated TLS certs
+  # no_log: true # contains sensitive info
+
+# TODO:
+# - factorize vars
+# - loop tasks
+# - extract version 
+# https://gateway-api.sigs.k8s.io/guides/?h=crds#installing-gateway-api
+- name: Download GatewayAPI CRDs manifests (standard)
+  ansible.builtin.uri:
+    url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+    return_content: true
+  register: talos_gateway_api_crds_standard
+
+- name: Download GatewayAPI CRDs manifests (experimental)
+  ansible.builtin.uri:
+    url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/experimental-install.yaml
+    return_content: true
+  register: talos_gateway_api_crds_experimental
+
+- name: Write inline manifests patch file
+  ansible.builtin.template:
+    src: inline-manifest-patch.yaml.j2
+    dest: "{{ talos_config_dir }}/inline-manifest-patch.yaml"
+    mode: "0600"
+  changed_when: false # because of randomly generated TLS certs
+  # no_log: true # contains sensitive info
